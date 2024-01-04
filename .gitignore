@@ -75,4 +75,6 @@ DerivedDataCache/*
 
 # Extra git files - Batches
 Content/Characters
-Content/CitySampleCrowd
+Content/CitySampleCrowd/Character/Anims
+Content/CitySampleCrowd/Character/Female
+
