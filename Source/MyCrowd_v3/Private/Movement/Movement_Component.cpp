@@ -1,5 +1,6 @@
 #include "Movement/Movement_Component.h"
 #include "Kismet/KismetMathLibrary.h"
+#include <FFLogger.h>
 
 // Sets default values for this component's properties
 UMovement_Component::UMovement_Component()
@@ -28,6 +29,7 @@ void UMovement_Component::BeginPlay()
 {
 	Super::BeginPlay();
 
+	FFLogger::LogMessage(LogMessageSeverity::Debug, "Init Movement Component");
 
 	//Initialise all our references and variables
 	m_selfPawn = Cast<APawn>(GetOwner());
@@ -74,11 +76,13 @@ void UMovement_Component::PerformMovement(FVector2D _direction)
 
 void UMovement_Component::StartSprinting()
 {
+	FFLogger::LogMessage(LogMessageSeverity::Debug, "Start Sprinting");
 	m_charMovementComp->MaxWalkSpeed = sprintingSpeed;
 }
 
 void UMovement_Component::StopSprinting()
 {
+	FFLogger::LogMessage(LogMessageSeverity::Debug, "Stop Sprinting");
 	m_charMovementComp->MaxWalkSpeed = walkingSpeed;
 }
 
