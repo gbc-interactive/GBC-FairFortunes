@@ -67,6 +67,23 @@ void UCameraControl_Component::TickComponent(float DeltaTime, ELevelTick TickTyp
 	}
 
 
+	//isAiming
+	if (m_isAiming == true)
+	{
+		if (m_isZoomingIn == true)
+		{
+			ZoomInAnimationTick();
+		}
+		else
+		{
+			ZoomOutAnimationTick();
+		}
+
+		m_animationTimeElapsed = m_animationTimeElapsed + DeltaTime;
+	}
+
+
+
 }
 
 void UCameraControl_Component::AddRotationInput(FVector2D actionValue)
@@ -103,3 +120,64 @@ void UCameraControl_Component::ToggleSmoothRotation()
 	accumulatedRotationInput = FVector2D{0.0f, 0.0f};
 }
 
+void UCameraControl_Component::StartAiming()
+{
+	//if player is aiming
+	if (m_isAiming == true)
+	{
+		if (m_isAnimating == true)
+		{
+			StopAnimation();
+		}
+
+		StartAnimation();
+		ToggleSmoothRotation();
+		m_pawn->bUseControllerRotationYaw = true;
+	}
+
+
+}
+
+void UCameraControl_Component::StopAiming()
+{
+	m_isAiming = false;
+
+	if (m_isAnimating == true)
+	{
+		StopAnimation();
+	}
+
+	StartAnimation();
+	ToggleSmoothRotation();
+	m_pawn->bUseControllerRotationYaw = false;
+}
+
+void UCameraControl_Component::Initialize()
+{
+}
+
+void UCameraControl_Component::ZoomInAnimationTick()
+{
+
+
+}
+
+void UCameraControl_Component::ZoomOutAnimationTick()
+{
+}
+
+void UCameraControl_Component::StartAnimation()
+{
+}
+
+void UCameraControl_Component::StopAnimation()
+{
+	m_isAiming = false;
+	m_animationTimeElapsed = 0.0f;
+	m_isZoomingIn = !m_isZoomingIn;
+}
+
+bool UCameraControl_Component::GetIsAiming()
+{
+	return m_isAiming;
+}

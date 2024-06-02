@@ -68,6 +68,22 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+
+private:
+	void ToggleSmoothRotation();
+
+	void Initialize();
+
+	void ZoomInAnimationTick();
+
+	void ZoomOutAnimationTick();
+
+	void StartAnimation();
+
+	void StopAnimation();
+
+	bool GetIsAiming();
+
 public:
 	// Sets default values for this component's properties
 	UCameraControl_Component();
@@ -78,7 +94,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AddRotationInput(FVector2D actionValue);
 
-	void ToggleSmoothRotation();
+	UFUNCTION(BlueprintCallable)
+	void StartAiming();
+
+	UFUNCTION(BlueprintCallable)
+	void StopAiming();
 
 
 };
