@@ -3,6 +3,9 @@
 
 #include "CameraControls/CameraControl_Component.h"
 
+#include "Evaluation/Blending/MovieSceneBlendType.h"
+#include "Kismet/KismetMathLibrary.h"
+
 // Sets default values for this component's properties
 UCameraControl_Component::UCameraControl_Component()
 {
@@ -21,6 +24,13 @@ void UCameraControl_Component::BeginPlay()
 
 	m_pawn = Cast<APawn>(GetOwner());
 
+	if(UWorld * World = GetWorld())
+	{
+		m_playerCamera = World->GetFirstPlayerController()->PlayerCameraManager;
+	}
+
+	InitializeAim();
+
 }
 
 
@@ -34,18 +44,18 @@ void UCameraControl_Component::TickComponent(float DeltaTime, ELevelTick TickTyp
 
 	if(useSmoothRotation == true)
 	{
-		if(accumulatedRotationInput.Length() > stoppingTolerance)
+		if(m_accumulatedRotationInput.Length() > stoppingTolerance)
 		{
 			//creating variables for Yaw Input
 			float cameraSpeed = DeltaTime * cameraRotationSpeed;
-			float cameraRotationInputX = accumulatedRotationInput.X * cameraSpeed;
-			float cameraRotationInputY = accumulatedRotationInput.Y * cameraSpeed;
+			float cameraRotationInputX = m_accumulatedRotationInput.X * cameraSpeed;
+			float cameraRotationInputY = m_accumulatedRotationInput.Y * cameraSpeed;
 
 			//adding to Yaw
 			m_pawn->AddControllerYawInput(cameraRotationInputX);
 
 			//setting accumulatedRotationInput
-			accumulatedRotationInput.X = accumulatedRotationInput.X - cameraRotationInputX;
+			m_accumulatedRotationInput.X = m_accumulatedRotationInput.X - cameraRotationInputX;
 
 			//Setting Pitch Input
 			if(invertYAxis == true)
@@ -53,14 +63,14 @@ void UCameraControl_Component::TickComponent(float DeltaTime, ELevelTick TickTyp
 				//adding to Pitch
 				m_pawn->AddControllerPitchInput(cameraRotationInputY * -1.0f);
 				//setting accumulatedRotationInput
-				accumulatedRotationInput.Y = accumulatedRotationInput.Y - (cameraRotationInputY * -1.0f);
+				m_accumulatedRotationInput.Y = m_accumulatedRotationInput.Y - (cameraRotationInputY * -1.0f);
 			}
 			else
 			{
 				//adding to Pitch
 				m_pawn->AddControllerPitchInput(cameraRotationInputY);
 				//setting accumulatedRotationInput
-				accumulatedRotationInput.Y = accumulatedRotationInput.Y - cameraRotationInputY;
+				m_accumulatedRotationInput.Y = m_accumulatedRotationInput.Y - cameraRotationInputY;
 			}
 
 		}
@@ -68,7 +78,7 @@ void UCameraControl_Component::TickComponent(float DeltaTime, ELevelTick TickTyp
 
 
 	//isAiming
-	if (m_isAiming == true)
+	if (m_isAnimating == true)
 	{
 		if (m_isZoomingIn == true)
 		{
@@ -94,8 +104,8 @@ void UCameraControl_Component::AddRotationInput(FVector2D actionValue)
 
 	if(useSmoothRotation == true)
 	{
-		accumulatedRotationInput.X = inputVector.X + accumulatedRotationInput.X;
-		accumulatedRotationInput.Y = inputVector.Y + accumulatedRotationInput.Y;
+		m_accumulatedRotationInput.X = inputVector.X + m_accumulatedRotationInput.X;
+		m_accumulatedRotationInput.Y = inputVector.Y + m_accumulatedRotationInput.Y;
 	}
 	else
 	{
@@ -117,24 +127,22 @@ void UCameraControl_Component::AddRotationInput(FVector2D actionValue)
 void UCameraControl_Component::ToggleSmoothRotation()
 {
 	useSmoothRotation = !useSmoothRotation;
-	accumulatedRotationInput = FVector2D{0.0f, 0.0f};
+	m_accumulatedRotationInput = FVector2D{0.0f, 0.0f};
 }
 
 void UCameraControl_Component::StartAiming()
 {
 	//if player is aiming
-	if (m_isAiming == true)
+	m_isAiming = true;
+	
+	if (m_isAnimating == true)
 	{
-		if (m_isAnimating == true)
-		{
-			StopAnimation();
-		}
-
-		StartAnimation();
-		ToggleSmoothRotation();
-		m_pawn->bUseControllerRotationYaw = true;
+		StopAnimation();
 	}
 
+	StartAnimation();
+	ToggleSmoothRotation();
+	m_pawn->bUseControllerRotationYaw = true;
 
 }
 
@@ -152,27 +160,61 @@ void UCameraControl_Component::StopAiming()
 	m_pawn->bUseControllerRotationYaw = false;
 }
 
-void UCameraControl_Component::Initialize()
+void UCameraControl_Component::InitializeAim()
 {
+	//getting FOV angle from camera
+	m_startFOV = m_playerCamera->GetFOVAngle();
+	//variables for getting endFOV
+	float reducedFOV = fovReductionPercent / 100.0f;
+	float middleFOV = m_startFOV * reducedFOV;
+	//setting endFOV using the startFOV - middleFOV
+	m_endFOV = m_startFOV - middleFOV;
 }
 
 void UCameraControl_Component::ZoomInAnimationTick()
 {
+	//uses zoom in
+	float animationTime = m_animationTimeElapsed / m_zoomInAnimationDuration;
+	float fov = m_playerCamera->GetFOVAngle(); // could make startFOV
+
+	if(animationTime <= 1.0f)
+	{
+		//uses endFOV because we are zooming in
+		m_playerCamera->SetFOV(FMath::Lerp(fov, m_endFOV, animationTime));
+	}
+	else
+	{
+		StopAnimation();
+	}
 
 
 }
 
 void UCameraControl_Component::ZoomOutAnimationTick()
 {
+	//uses zoom out instead of in
+	float animationTime = m_animationTimeElapsed / m_zoomOutAnimationDuration;
+	float fov = m_playerCamera->GetFOVAngle(); // could make startFOV
+
+	if (animationTime <= 1.0f)
+	{
+		//uses StartFov because we are going back to original camera
+		m_playerCamera->SetFOV(FMath::Lerp(fov, m_startFOV, animationTime));
+	}
+	else
+	{
+		StopAnimation();
+	}
 }
 
 void UCameraControl_Component::StartAnimation()
 {
+	m_isAnimating = true;
 }
 
 void UCameraControl_Component::StopAnimation()
 {
-	m_isAiming = false;
+	m_isAnimating = false;
 	m_animationTimeElapsed = 0.0f;
 	m_isZoomingIn = !m_isZoomingIn;
 }

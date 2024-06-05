@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "FFLogger.h"
 #include "CameraControl_Component.generated.h"
 
 
@@ -18,16 +19,23 @@ class MYCROWD_V3_API UCameraControl_Component : public UActorComponent
 private:	
 
 	APawn* m_pawn;
+	APlayerCameraManager* m_playerCamera;
+
+	FFLogger m_debug;
+
+	FVector2D m_accumulatedRotationInput{ 0.0f, 0.0f };
 
 	//These variables are for aiming
 	bool m_isAiming = false;
 	bool m_isAnimating = false;
 	bool m_isZoomingIn = true;
 
-	float m_animationTimeElapsed;
-	float m_zoomInAnimation;
-	float m_zoomOutAnimation;
+	float m_animationTimeElapsed = 0.0f;
+	float m_zoomInAnimationDuration = 1.5f;
+	float m_zoomOutAnimationDuration = 0.75f;
 
+	float m_startFOV;
+	float m_endFOV;
 
 
 public:
@@ -43,9 +51,6 @@ public:
 	float stoppingTolerance = 0.1f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Controls")
-	FVector2D accumulatedRotationInput{ 0.0f, 0.0f };
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Controls")
 	float cameraRotationSpeed = 1.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Controls")
@@ -53,14 +58,7 @@ public:
 
 	//These variables are for aiming
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aiming")
-	float fovReductionPercent = 10.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aiming")
-	float startFOV;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aiming")
-	float endFOV;
-
+	float fovReductionPercent = 30.0f;
 
 
 
@@ -72,7 +70,7 @@ protected:
 private:
 	void ToggleSmoothRotation();
 
-	void Initialize();
+	void InitializeAim();
 
 	void ZoomInAnimationTick();
 
