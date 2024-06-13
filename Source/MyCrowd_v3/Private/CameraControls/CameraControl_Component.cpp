@@ -2,7 +2,7 @@
 
 
 #include "CameraControls/CameraControl_Component.h"
-
+#include "FFLogger.h"
 #include "Evaluation/Blending/MovieSceneBlendType.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -91,9 +91,6 @@ void UCameraControl_Component::TickComponent(float DeltaTime, ELevelTick TickTyp
 
 		m_animationTimeElapsed = m_animationTimeElapsed + DeltaTime;
 	}
-
-
-
 }
 
 void UCameraControl_Component::AddRotationInput(FVector2D actionValue)
@@ -186,8 +183,6 @@ void UCameraControl_Component::ZoomInAnimationTick()
 	{
 		StopAnimation();
 	}
-
-
 }
 
 void UCameraControl_Component::ZoomOutAnimationTick()

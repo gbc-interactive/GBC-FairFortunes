@@ -3,15 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
-#include "FFLogger.h"
 #include "CameraControl_Component.generated.h"
 
 
 //<summary>
 //This class handles the camera controls (pitch and yaw), will also be in charge of Aiming
 //</summary>
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Custom), meta = (BlueprintSpawnableComponent))
 class MYCROWD_V3_API UCameraControl_Component : public UActorComponent
 {
 	GENERATED_BODY()
@@ -20,8 +18,6 @@ private:
 
 	APawn* m_pawn;
 	APlayerCameraManager* m_playerCamera;
-
-	FFLogger m_debug;
 
 	FVector2D m_accumulatedRotationInput{ 0.0f, 0.0f };
 
@@ -80,7 +76,6 @@ private:
 
 	void StopAnimation();
 
-	bool GetIsAiming();
 
 public:
 	// Sets default values for this component's properties
@@ -98,5 +93,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StopAiming();
 
-
+	UFUNCTION(BlueprintCallable)
+	bool GetIsAiming();
 };
