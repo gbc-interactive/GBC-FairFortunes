@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CameraControls/CameraControl_Component.h"
+#include "CameraControl_Component.h"
 #include "FFLogger.h"
 #include "Evaluation/Blending/MovieSceneBlendType.h"
 #include "Kismet/KismetMathLibrary.h"
