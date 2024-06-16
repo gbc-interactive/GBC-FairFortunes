@@ -43,6 +43,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	TSubclassOf<class AProjectileBase> projectileToSpawn_Grenade;
 
+private:
+	void EnableGun();
+	void EnableGrenade();
+
 protected:
 	virtual void BeginPlay() override;
 
