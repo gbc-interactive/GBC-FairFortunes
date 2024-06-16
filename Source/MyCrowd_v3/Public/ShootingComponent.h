@@ -24,6 +24,8 @@ private:
 	FTimerHandle m_gunShotDelayTimer;
 	FTimerHandle m_grenadeDelayTimer;
 
+	FTimerHandle m_gunReloadTimer;
+	FTimerHandle m_grenadeReloadTimer;
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	int maxAmmo_Gun;
@@ -36,6 +38,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	float fireRate_Grenade;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	float reloadTime_Gun;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	float reloadTime_Grenade;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	TSubclassOf<class AProjectileBase> projectileToSpawn_Gun;
