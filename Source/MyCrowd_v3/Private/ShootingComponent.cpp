@@ -130,6 +130,20 @@ void UShootingComponent::ReloadFull_GrenadeAmmo()
 	);
 }
 
+void UShootingComponent::ReloadFullAmmo_AllWeapons()
+{
+	GetWorld()->GetTimerManager().SetTimer(
+		m_gunReloadTimer,
+		FTimerDelegate::CreateLambda([this]()
+			{
+				m_currentAmmo_Grenade = maxAmmo_Grenade;
+				m_currentAmmo_Gun = maxAmmo_Gun;
+			}),
+		reloadTime_Gun,
+		false
+	);
+}
+
 void UShootingComponent::ReloadFixedAmount_GrenadeAmmo(int amountToReload)
 {
 	GetWorld()->GetTimerManager().SetTimer(

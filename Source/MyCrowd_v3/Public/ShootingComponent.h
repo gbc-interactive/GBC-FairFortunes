@@ -77,6 +77,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void ReloadFull_GrenadeAmmo();
 
+	UFUNCTION(BlueprintCallable, Category="Weapon")
+	void ReloadFullAmmo_AllWeapons();
+
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void ReloadFixedAmount_GrenadeAmmo(int amountToReload);
 
