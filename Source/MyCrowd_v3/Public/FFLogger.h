@@ -18,6 +18,7 @@ enum LogMessageSeverity
  */
 static class MYCROWD_V3_API FFLogger
 {
+
 public:
 	static void LogMessage(LogMessageSeverity severity, FString message);
 };

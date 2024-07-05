@@ -13,6 +13,7 @@ UInteractAction_Component::UInteractAction_Component()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
+	m_world = GetWorld();
 }
 
 
@@ -20,9 +21,6 @@ UInteractAction_Component::UInteractAction_Component()
 void UInteractAction_Component::BeginPlay()
 {
 	Super::BeginPlay();
-
-	m_world = GetWorld();
-	
 }
 
 
@@ -57,38 +55,37 @@ void UInteractAction_Component::TryToInteract()
 		// and its fields will be filled with detailed info about what was hit
 		if (Hit.bBlockingHit && IsValid(Hit.GetActor()))
 		{
-			//FFLogger::LogMessage(LogMessageSeverity::Debug, "Actor hit: " + Hit.GetActor()->GetName());
+			FFLogger::LogMessage(LogMessageSeverity::Debug, "Actor hit: " + Hit.GetActor()->GetName());
 			AInteractableActor* interactableActor = Cast<AInteractableActor>(Hit.GetActor());
 			if (IsValid(interactableActor))
 			{
-				//FFLogger::LogMessage(LogMessageSeverity::Debug, "Interactable Actor found: " + interactableActor->GetName());
+				FFLogger::LogMessage(LogMessageSeverity::Debug, "Interactable Actor found: " + interactableActor->GetName());
 				interactableActor->ReceiveInteract(GetOwner());
 			}
 		}
 		else
 		{
-			//FFLogger::LogMessage(LogMessageSeverity::Debug, "No Actors were hit");
+			FFLogger::LogMessage(LogMessageSeverity::Debug, "No Actors were hit");
 		}
 	}
 	else
 	{
-		//FFLogger::LogMessage(LogMessageSeverity::Debug, "No Actors were hit");
-	
+		FFLogger::LogMessage(LogMessageSeverity::Debug, "No Actors were hit");
 	}
 
 	// You can use DrawDebug helpers and the log to help visualize and debug your trace queries.
 	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, Hit.bBlockingHit ? FColor::Blue : FColor::Red, false, 5.0f, 0, 10.0f);
-	//FFLogger::LogMessage(LogMessageSeverity::Debug, "Tracing line: " + TraceStart.ToString() + " to " + TraceEnd.ToString());
+	FFLogger::LogMessage(LogMessageSeverity::Debug, "Tracing line: " + TraceStart.ToString() + " to " + TraceEnd.ToString());
 
 	// If the trace hit something, bBlockingHit will be true,
 	// and its fields will be filled with detailed info about what was hit
 	if (Hit.bBlockingHit && IsValid(Hit.GetActor()))
 	{
-		//FFLogger::LogMessage(LogMessageSeverity::Debug, "Actor hit: " + Hit.GetActor()->GetName());
+		FFLogger::LogMessage(LogMessageSeverity::Debug, "Actor hit: " + Hit.GetActor()->GetName());
 	}
 	else 
 	{
-		//FFLogger::LogMessage(LogMessageSeverity::Debug, "No Actors were hit");
+		FFLogger::LogMessage(LogMessageSeverity::Debug, "No Actors were hit");
 	}
 }
 
