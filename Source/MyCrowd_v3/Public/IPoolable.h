@@ -18,7 +18,7 @@ class MYCROWD_V3_API IPoolable
 public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Poolable")
-	void OnSpawnFromPool();
+	void OnSpawnFromPool(const FVector& _worldSpawnLocation, const FRotator& _worldForwardDirection);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Poolable")
 	void OnReturnToPool();

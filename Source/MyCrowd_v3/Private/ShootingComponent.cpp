@@ -1,5 +1,6 @@
 #include "ShootingComponent.h"
 #include "FFLogger.h"
+#include "SpawnPoolSubsystem.h"
 
 UShootingComponent::UShootingComponent()
 {
@@ -47,7 +48,7 @@ void UShootingComponent::ShootGun()
 	//step1: instantiate the projectile provided as the bullet, the projectile is assumed to perform its own movement
 	//projectileToSpawn_Grenade
 	FFLogger::LogMessage(LogMessageSeverity::Debug, "Shooting gun");
-
+	//AProjectileBase* spawnedBullet = GetWorld()->GetSubsystem<USpawnPoolSubsystem>()->SpawnFromPool(projectileToSpawn_Gun, GetOwner()->GetActorLocation(), GetOwner()->GetActorRotation());
 
 	//step 2: set a timer to delay the next shot
 	GetWorld()->GetTimerManager().SetTimer(m_gunShotDelayTimer, this, &UShootingComponent::EnableGun, m_delayBetweenThrows_Grenade);
@@ -62,6 +63,7 @@ void UShootingComponent::LaunchGrenade()
 	}
 
 	if (m_currentAmmo_Grenade <= 0)
+        //AProjectileBase* spawnedBullet = GetWorld()->GetSubsystem<USpawnPoolSubsystem>()->SpawnFromPool(projectileToSpawn_Gun, GetOwner()->GetActorLocation(), GetOwner()->GetActorRotation());
 	{
 		FFLogger::LogMessage(LogMessageSeverity::Debug, "Out of grenades");
 		return;
@@ -111,6 +113,7 @@ void UShootingComponent::ReloadFixedAmount_GunAmmo(int amountToReload)
 			{
 				FFLogger::LogMessage(LogMessageSeverity::Debug, "Reloading gun by " + FString::FromInt(amountToReload));
 				m_currentAmmo_Gun += amountToReload;
+				m_currentAmmo_Gun = FMath::Clamp(m_currentAmmo_Gun, 0, maxAmmo_Grenade);
 			}),
 		reloadTime_Gun,
 		false
@@ -151,6 +154,7 @@ void UShootingComponent::ReloadFixedAmount_GrenadeAmmo(int amountToReload)
 		FTimerDelegate::CreateLambda([this, amountToReload]()
 			{
 				m_currentAmmo_Grenade += amountToReload;
+				m_currentAmmo_Grenade = FMath::Clamp(m_currentAmmo_Grenade, 0, maxAmmo_Grenade);
 			}),
 		reloadTime_Grenade,
 		false

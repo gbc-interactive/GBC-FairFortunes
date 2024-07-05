@@ -41,6 +41,9 @@ public:
 	FVector2D lookSensitivity{ 1.5f, 1.0f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Controls")
+	FVector2D ADSLookSensitivity{ 1.5f, 1.0f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Controls")
 	bool useSmoothRotation = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Controls")
@@ -76,6 +79,7 @@ private:
 
 	void StopAnimation();
 
+	//void CheckLineOfSight();
 
 public:
 	// Sets default values for this component's properties

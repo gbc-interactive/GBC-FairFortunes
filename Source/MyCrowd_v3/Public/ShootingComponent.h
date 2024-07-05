@@ -49,6 +49,9 @@ public:
 	TSubclassOf<class AProjectileBase> projectileToSpawn_Gun;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	UClass* projectileToSpawn_GunClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	TSubclassOf<class AProjectileBase> projectileToSpawn_Grenade;
 
 private:

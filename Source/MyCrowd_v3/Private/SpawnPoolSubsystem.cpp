@@ -43,6 +43,7 @@ T* USpawnPoolSubsystem::SpawnFromPool(TSubclassOf<AActor> _actorClass, const FVe
 
 			spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 			spawnedActor = GetWorld()->SpawnActor<T>(_actorClass, _position, _rotation, spawnParams);
+			//spawnedActor = GetWorld()->SpawnActor(_actorClass->StaticClass(), NAME_None, _position, _rotation, spawnParams);
 		}
 		else
 		{
@@ -51,7 +52,7 @@ T* USpawnPoolSubsystem::SpawnFromPool(TSubclassOf<AActor> _actorClass, const FVe
 
 		}
 
-		IPoolable::Execute_OnSpawnFromPool(spawnedActor);
+		IPoolable::Execute_OnSpawnFromPool(spawnedActor, _position, _rotation);
 	}
 
 	return spawnedActor;

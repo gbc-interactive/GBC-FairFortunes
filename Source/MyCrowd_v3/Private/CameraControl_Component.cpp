@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "CameraControl_Component.h"
 #include "FFLogger.h"
 #include "Evaluation/Blending/MovieSceneBlendType.h"
@@ -72,12 +69,11 @@ void UCameraControl_Component::TickComponent(float DeltaTime, ELevelTick TickTyp
 				//setting accumulatedRotationInput
 				m_accumulatedRotationInput.Y = m_accumulatedRotationInput.Y - cameraRotationInputY;
 			}
-
 		}
+
 	}
 
 
-	//isAiming
 	if (m_isAnimating == true)
 	{
 		if (m_isZoomingIn == true)
@@ -97,18 +93,34 @@ void UCameraControl_Component::AddRotationInput(FVector2D actionValue)
 {
 
 	//Setting input vector
-	FVector2D inputVector = lookSensitivity * actionValue;
+	FVector2D inputVector;
+	
+	if (m_isAiming)
+	{
+		inputVector = ADSLookSensitivity * actionValue;
+	}
+	else
+	{
+		inputVector = lookSensitivity * actionValue;
+	}
 
 	if(useSmoothRotation == true)
 	{
 		m_accumulatedRotationInput.X = inputVector.X + m_accumulatedRotationInput.X;
-		m_accumulatedRotationInput.Y = inputVector.Y + m_accumulatedRotationInput.Y;
+		if (invertYAxis == true)
+		{
+			m_accumulatedRotationInput.Y = inputVector.Y + m_accumulatedRotationInput.Y;
+		}
+		else
+		{
+			m_accumulatedRotationInput.Y = inputVector.Y * -1.0f + m_accumulatedRotationInput.Y;
+		}
 	}
 	else
 	{
 		m_pawn->AddControllerYawInput(inputVector.X);
 
-		if(invertYAxis == true)
+		if (invertYAxis == true)
 		{
 			m_pawn->AddControllerPitchInput(inputVector.Y * -1.0f);
 		}
@@ -116,7 +128,6 @@ void UCameraControl_Component::AddRotationInput(FVector2D actionValue)
 		{
 			m_pawn->AddControllerPitchInput(inputVector.Y);
 		}
-
 	}
 
 }
@@ -213,6 +224,26 @@ void UCameraControl_Component::StopAnimation()
 	m_animationTimeElapsed = 0.0f;
 	m_isZoomingIn = !m_isZoomingIn;
 }
+
+//void UCameraControl_Component::CheckLineOfSight()
+//{
+//	FCollisionQueryParams RV_TraceParams = FCollisionQueryParams(FName(TEXT("RV_Trace")), true, this);
+//	RV_TraceParams.bTraceComplex = true;
+//	RV_TraceParams.bTraceAsyncScene = true;
+//	RV_TraceParams.bReturnPhysicalMaterial = false;
+//
+//	//Re-initialize hit info
+//	FHitResult RV_Hit(ForceInit);
+//
+//	//call GetWorld() from within an actor extending class
+//	GetWorld()->LineTraceSingle(
+//		RV_Hit,		//result
+//		Start,	//start
+//		End, //end
+//		ECC_Pawn, //collision channel
+//		RV_TraceParams
+//	);
+//}
 
 bool UCameraControl_Component::GetIsAiming()
 {
