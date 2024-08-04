@@ -39,39 +39,39 @@ void UCameraControl_Component::TickComponent(float DeltaTime, ELevelTick TickTyp
 
 	//RotationInterpolation
 
-	if(useSmoothRotation == true)
-	{
-		if(m_accumulatedRotationInput.Length() > stoppingTolerance)
-		{
-			//creating variables for Yaw Input
-			float cameraSpeed = DeltaTime * cameraRotationSpeed;
-			float cameraRotationInputX = m_accumulatedRotationInput.X * cameraSpeed;
-			float cameraRotationInputY = m_accumulatedRotationInput.Y * cameraSpeed;
+	//if(useSmoothRotation == true)
+	//{
+	//	if(m_accumulatedRotationInput.Length() > stoppingTolerance)
+	//	{
+	//		//creating variables for Yaw Input
+	//		float cameraSpeed = DeltaTime * cameraRotationSpeed;
+	//		float cameraRotationInputX = m_accumulatedRotationInput.X * cameraSpeed;
+	//		float cameraRotationInputY = m_accumulatedRotationInput.Y * cameraSpeed;
 
-			//adding to Yaw
-			m_pawn->AddControllerYawInput(cameraRotationInputX);
+	//		//adding to Yaw
+	//		m_pawn->AddControllerYawInput(cameraRotationInputX);
 
-			//setting accumulatedRotationInput
-			m_accumulatedRotationInput.X = m_accumulatedRotationInput.X - cameraRotationInputX;
+	//		//setting accumulatedRotationInput
+	//		m_accumulatedRotationInput.X = m_accumulatedRotationInput.X - cameraRotationInputX;
 
-			//Setting Pitch Input
-			if(invertYAxis == true)
-			{
-				//adding to Pitch
-				m_pawn->AddControllerPitchInput(cameraRotationInputY * -1.0f);
-				//setting accumulatedRotationInput
-				m_accumulatedRotationInput.Y = m_accumulatedRotationInput.Y - (cameraRotationInputY * -1.0f);
-			}
-			else
-			{
-				//adding to Pitch
-				m_pawn->AddControllerPitchInput(cameraRotationInputY);
-				//setting accumulatedRotationInput
-				m_accumulatedRotationInput.Y = m_accumulatedRotationInput.Y - cameraRotationInputY;
-			}
-		}
+	//		//Setting Pitch Input
+	//		if(invertYAxis == true)
+	//		{
+	//			//adding to Pitch
+	//			m_pawn->AddControllerPitchInput(cameraRotationInputY * -1.0f);
+	//			//setting accumulatedRotationInput
+	//			m_accumulatedRotationInput.Y = m_accumulatedRotationInput.Y - (cameraRotationInputY * -1.0f);
+	//		}
+	//		else
+	//		{
+	//			//adding to Pitch
+	//			m_pawn->AddControllerPitchInput(cameraRotationInputY);
+	//			//setting accumulatedRotationInput
+	//			m_accumulatedRotationInput.Y = m_accumulatedRotationInput.Y - cameraRotationInputY;
+	//		}
+	//	}
 
-	}
+	//}
 
 
 	if (m_isAnimating == true)
@@ -104,7 +104,7 @@ void UCameraControl_Component::AddRotationInput(FVector2D actionValue)
 		inputVector = lookSensitivity * actionValue;
 	}
 
-	if(useSmoothRotation == true)
+	/*if(useSmoothRotation == true)
 	{
 		m_accumulatedRotationInput.X = inputVector.X + m_accumulatedRotationInput.X;
 		if (invertYAxis == true)
@@ -115,8 +115,8 @@ void UCameraControl_Component::AddRotationInput(FVector2D actionValue)
 		{
 			m_accumulatedRotationInput.Y = inputVector.Y * -1.0f + m_accumulatedRotationInput.Y;
 		}
-	}
-	else
+	}*/
+	//else
 	{
 		m_pawn->AddControllerYawInput(inputVector.X);
 
@@ -149,7 +149,7 @@ void UCameraControl_Component::StartAiming()
 	}
 
 	StartAnimation();
-	ToggleSmoothRotation();
+	//ToggleSmoothRotation();
 	m_pawn->bUseControllerRotationYaw = true;
 
 	ADSBeginEvent.ExecuteIfBound();
@@ -165,7 +165,7 @@ void UCameraControl_Component::StopAiming()
 	}
 
 	StartAnimation();
-	ToggleSmoothRotation();
+	//ToggleSmoothRotation();
 	m_pawn->bUseControllerRotationYaw = false;
 
 	ADSEndEvent.ExecuteIfBound();
@@ -228,25 +228,6 @@ void UCameraControl_Component::StopAnimation()
 	m_isZoomingIn = !m_isZoomingIn;
 }
 
-//void UCameraControl_Component::CheckLineOfSight()
-//{
-//	FCollisionQueryParams RV_TraceParams = FCollisionQueryParams(FName(TEXT("RV_Trace")), true, this);
-//	RV_TraceParams.bTraceComplex = true;
-//	RV_TraceParams.bTraceAsyncScene = true;
-//	RV_TraceParams.bReturnPhysicalMaterial = false;
-//
-//	//Re-initialize hit info
-//	FHitResult RV_Hit(ForceInit);
-//
-//	//call GetWorld() from within an actor extending class
-//	GetWorld()->LineTraceSingle(
-//		RV_Hit,		//result
-//		Start,	//start
-//		End, //end
-//		ECC_Pawn, //collision channel
-//		RV_TraceParams
-//	);
-//}
 
 bool UCameraControl_Component::GetIsAiming()
 {
