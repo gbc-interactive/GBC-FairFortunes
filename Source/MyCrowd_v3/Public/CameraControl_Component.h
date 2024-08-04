@@ -59,6 +59,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aiming")
 	float fovReductionPercent = 30.0f;
 
+	DECLARE_DELEGATE(ADSChangedDelegate);
+
+	ADSChangedDelegate ADSBeginEvent;
+	ADSChangedDelegate ADSEndEvent;
+
+private:
+
+	
 
 
 protected:

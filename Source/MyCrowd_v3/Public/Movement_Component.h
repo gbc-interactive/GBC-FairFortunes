@@ -24,12 +24,17 @@ private:
 
 	float m_timeSinceSprintStart;
 
+	float m_currentMoveSpeed;
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float walkingSpeed = 400.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float sprintingSpeed = 600.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (ClampMin = "0.0", ClampMax = "200.0", UIMin = "0.0", UIMax = "200.0"))
+	float adsMovementSpeedMultiplierPercent = 70.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float sprintMaxDurationSeconds = 5.0f;
@@ -39,6 +44,10 @@ public:
 
 private:
 	void RechargeStamina(float _deltaTime);
+
+	void OnBeginADS();
+
+	void OnEndADS();
 
 protected:
 	// Called when the game starts
@@ -60,7 +69,4 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void StopSprinting();
-		
-
-
 };

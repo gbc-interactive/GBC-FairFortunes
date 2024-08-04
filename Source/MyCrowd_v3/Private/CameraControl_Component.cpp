@@ -152,6 +152,7 @@ void UCameraControl_Component::StartAiming()
 	ToggleSmoothRotation();
 	m_pawn->bUseControllerRotationYaw = true;
 
+	ADSBeginEvent.ExecuteIfBound();
 }
 
 void UCameraControl_Component::StopAiming()
@@ -166,6 +167,8 @@ void UCameraControl_Component::StopAiming()
 	StartAnimation();
 	ToggleSmoothRotation();
 	m_pawn->bUseControllerRotationYaw = false;
+
+	ADSEndEvent.ExecuteIfBound();
 }
 
 void UCameraControl_Component::InitializeAim()

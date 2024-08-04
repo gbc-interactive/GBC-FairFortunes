@@ -1,5 +1,6 @@
 #include "Movement_Component.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "CameraControl_Component.h"
 #include <FFLogger.h>
 
 // Sets default values for this component's properties
@@ -36,6 +37,10 @@ void UMovement_Component::BeginPlay()
 	m_charMovementComp = Cast<UCharacterMovementComponent>(m_selfPawn->GetMovementComponent());
 	m_isSprinting = false;
 	m_currentStamina = 1.0f;
+	m_currentMoveSpeed = walkingSpeed;
+
+	m_selfPawn->GetComponentByClass<UCameraControl_Component>()->ADSBeginEvent.BindUObject(this, &UMovement_Component::OnBeginADS);
+	m_selfPawn->GetComponentByClass<UCameraControl_Component>()->ADSEndEvent.BindUObject(this, &UMovement_Component::OnEndADS);
 }
 
 // Called every frame
@@ -86,3 +91,13 @@ void UMovement_Component::StopSprinting()
 	m_charMovementComp->MaxWalkSpeed = walkingSpeed;
 }
 
+void UMovement_Component::OnBeginADS()
+{
+	FFLogger::LogMessage(LogMessageSeverity::Debug, "Begin ADS movement speed slowed");
+	m_charMovementComp->MaxWalkSpeed = walkingSpeed * (adsMovementSpeedMultiplierPercent / 100.0f);
+}
+
+void UMovement_Component::OnEndADS() {
+	FFLogger::LogMessage(LogMessageSeverity::Debug, "End ADS movement speed returned to normal");
+	m_charMovementComp->MaxWalkSpeed = walkingSpeed;
+}
