@@ -52,6 +52,9 @@ public:
 	UClass* projectileToSpawn_GunClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	UClass* projectileToSpawn_GrenadeClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	TSubclassOf<class AProjectileBase> projectileToSpawn_Grenade;
 
 private:
@@ -66,7 +69,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Shooting")
-	void ShootGun();
+	void ShootGun(FVector bulletSpawnLocation);
 
 	UFUNCTION(BlueprintCallable, Category = "Shooting")
 	void LaunchGrenade();
