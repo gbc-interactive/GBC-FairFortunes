@@ -1,6 +1,5 @@
 #include "CameraControl_Component.h"
 #include "FFLogger.h"
-#include "Evaluation/Blending/MovieSceneBlendType.h"
 #include "Kismet/KismetMathLibrary.h"
 
 // Sets default values for this component's properties

@@ -1,6 +1,6 @@
 #include "ShootingComponent.h"
 #include "FFLogger.h"
-#include "SpawnPoolSubsystem.h"
+#include "ProjectileSpawnerSubsystem.h"
 
 UShootingComponent::UShootingComponent()
 {
@@ -10,7 +10,7 @@ UShootingComponent::UShootingComponent()
 
 void UShootingComponent::BeginPlay()
 {
-	Super::BeginPlay();
+	//Super::BeginPlay();
 
 	m_delayBetweenShots_Gun = 1.0f / fireRate_Gun;
 	m_delayBetweenThrows_Grenade = 1.0f / fireRate_Grenade;
@@ -20,6 +20,9 @@ void UShootingComponent::BeginPlay()
 
 	m_canLaunch_Grenade = true;
 	m_canShoot_Gun = true;
+
+	//init object pool for gun projectile
+	GetWorld()->GetSubsystem<UProjectileSpawnerSubsystem>()->InitializeSubsystem(projectileToSpawn_GunClass, maxAmmo_Gun, projectileToSpawn_GrenadeClass, maxAmmo_Grenade);
 }
 
 
@@ -28,7 +31,7 @@ void UShootingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UShootingComponent::ShootGun()
+void UShootingComponent::ShootGun(FVector bulletSpawnLocation)
 {
 	if(m_canShoot_Gun == false)
 	{
@@ -47,8 +50,8 @@ void UShootingComponent::ShootGun()
 
 	//step1: instantiate the projectile provided as the bullet, the projectile is assumed to perform its own movement
 	//projectileToSpawn_Grenade
-	FFLogger::LogMessage(LogMessageSeverity::Debug, "Shooting gun");
-	//AProjectileBase* spawnedBullet = GetWorld()->GetSubsystem<USpawnPoolSubsystem>()->SpawnFromPool(projectileToSpawn_Gun, GetOwner()->GetActorLocation(), GetOwner()->GetActorRotation());
+	FFLogger::LogMessage(LogMessageSeverity::Debug, "Shooting gun"); 
+	GetWorld()->GetSubsystem<UProjectileSpawnerSubsystem>()->SpawnGunProjectile(bulletSpawnLocation, GetOwner()->GetActorRotation());
 
 	//step 2: set a timer to delay the next shot
 	GetWorld()->GetTimerManager().SetTimer(m_gunShotDelayTimer, this, &UShootingComponent::EnableGun, m_delayBetweenThrows_Grenade);
