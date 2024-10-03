@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include <Components/ArrowComponent.h>
 #include "ShootingComponent.generated.h"
 
 
@@ -26,6 +27,9 @@ private:
 
 	FTimerHandle m_gunReloadTimer;
 	FTimerHandle m_grenadeReloadTimer;
+
+
+	USceneComponent* projectileSpawnPoint;
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	int maxAmmo_Gun;
@@ -45,8 +49,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	float reloadTime_Grenade;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	TSubclassOf<class AProjectileBase> projectileToSpawn_Gun;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	UClass* projectileToSpawn_GunClass;
@@ -54,8 +56,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	UClass* projectileToSpawn_GrenadeClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	TSubclassOf<class AProjectileBase> projectileToSpawn_Grenade;
+
+
+
+	
 
 private:
 	void EnableGun();

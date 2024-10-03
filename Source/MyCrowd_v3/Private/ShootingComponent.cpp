@@ -1,6 +1,7 @@
 #include "ShootingComponent.h"
 #include "FFLogger.h"
 #include "ProjectileSpawnerSubsystem.h"
+#include <Kismet/KismetMathLibrary.h>
 
 UShootingComponent::UShootingComponent()
 {
@@ -21,6 +22,8 @@ void UShootingComponent::BeginPlay()
 	m_canLaunch_Grenade = true;
 	m_canShoot_Gun = true;
 
+	projectileSpawnPoint = Cast<USceneComponent>(GetOwner()->GetComponentsByTag(USceneComponent::StaticClass(), TEXT("projectileSpawnPoint"))[0]);
+
 	//init object pool for gun projectile
 	GetWorld()->GetSubsystem<UProjectileSpawnerSubsystem>()->InitializeSubsystem(projectileToSpawn_GunClass, maxAmmo_Gun, projectileToSpawn_GrenadeClass, maxAmmo_Grenade);
 }
@@ -29,6 +32,33 @@ void UShootingComponent::BeginPlay()
 void UShootingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+
+	TEnumAsByte<ECollisionChannel> TraceChannelProperty = ECC_WorldStatic;
+
+	APlayerCameraManager* m_playerCamera = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
+	FVector cameraLocation;
+	FRotator cameraRotation;
+	m_playerCamera->GetCameraViewPoint(cameraLocation, cameraRotation);
+	FHitResult Hit;
+
+	FVector TraceStart = cameraLocation;//projectileSpawnPosition->GetComponentLocation();
+	FVector TraceEnd = cameraLocation + UKismetMathLibrary::GetForwardVector(cameraRotation) * 1000.0f;
+
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(m_playerCamera);
+
+	// To run the query, you need a pointer to the current level, which you can get from an Actor with GetWorld()
+	// UWorld()->LineTraceSingleByChannel runs a line trace and returns the first actor hit over the provided collision channel.
+	GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, TraceChannelProperty, QueryParams);
+
+	// You can use DrawDebug helpers and the log to help visualize and debug your trace queries.
+	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, Hit.bBlockingHit ? FColor::Blue : FColor::Red, false, 0, 10.0f);
+
+	DrawDebugLine(GetWorld(), projectileSpawnPoint->GetComponentLocation(), TraceEnd, Hit.bBlockingHit ? FColor::Blue : FColor::Red, false, 0, 10.0f);
+
+
+	DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 10.0f, 10, FColor::Green, false, 0, 10.0f);
 }
 
 void UShootingComponent::ShootGun(FVector bulletSpawnLocation)
@@ -48,12 +78,56 @@ void UShootingComponent::ShootGun(FVector bulletSpawnLocation)
 
 	m_currentAmmo_Gun--;
 
-	//step1: instantiate the projectile provided as the bullet, the projectile is assumed to perform its own movement
+	//step 1: find the right direction for the projectile
+	APlayerCameraManager* m_playerCamera = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
+	APawn* m_pawn = Cast<APawn>(GetOwner());
+
+	TEnumAsByte<ECollisionChannel> TraceChannelProperty = ECC_WorldStatic;
+
+	FVector cameraLocation;
+	FRotator cameraRotation;
+	m_playerCamera->GetCameraViewPoint(cameraLocation, cameraRotation);
+	FHitResult Hit;
+
+	FVector TraceStart = cameraLocation;//projectileSpawnPosition->GetComponentLocation();
+	FVector TraceEnd = cameraLocation + UKismetMathLibrary::GetForwardVector(cameraRotation) * 1000.0f;
+
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(m_playerCamera);
+
+	// To run the query, you need a pointer to the current level, which you can get from an Actor with GetWorld()
+	// UWorld()->LineTraceSingleByChannel runs a line trace and returns the first actor hit over the provided collision channel.
+	GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, TraceChannelProperty, QueryParams);
+
+	// You can use DrawDebug helpers and the log to help visualize and debug your trace queries.
+	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, Hit.bBlockingHit ? FColor::Blue : FColor::Red, false, 0, 10.0f);
+
+	DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 10.0f, 10, FColor::Green, false, 0, 10.0f);
+
+	//FVector charMeshPosition = m_pawn->FindComponentByClass<USkeletalMeshComponent>()->GetComponentLocation();
+
+	FRotator rotationToSet;// = UKismetMathLibrary::FindLookAtRotation(projectileSpawnPoint->GetComponentLocation(), Hit.ImpactPoint);
+	if (Hit.bBlockingHit)
+	{
+		rotationToSet = UKismetMathLibrary::FindLookAtRotation(projectileSpawnPoint->GetComponentLocation(), Hit.ImpactPoint);
+	}
+	else
+	{
+		rotationToSet = UKismetMathLibrary::FindLookAtRotation(projectileSpawnPoint->GetComponentLocation(), TraceEnd);
+	}
+
+
+	//DrawDebugLine(GetWorld(), charMeshPosition, Hit.ImpactPoint, FColor::Red, false, 0, 10.0f);
+	//m_pawn->SetActorRotation(FRotator::MakeFromEuler(FVector(0, 0, rotationToSet.Euler().Z)));
+
+
+	//step2: instantiate the projectile provided as the bullet, the projectile is assumed to perform its own movement
 	//projectileToSpawn_Grenade
 	FFLogger::LogMessage(LogMessageSeverity::Debug, "Shooting gun"); 
-	GetWorld()->GetSubsystem<UProjectileSpawnerSubsystem>()->SpawnGunProjectile(bulletSpawnLocation, GetOwner()->GetActorRotation());
+	//GetWorld()->GetSubsystem<UProjectileSpawnerSubsystem>()->SpawnGunProjectile(bulletSpawnLocation, GetOwner()->GetActorRotation());
+	GetWorld()->GetSubsystem<UProjectileSpawnerSubsystem>()->SpawnGunProjectile(projectileSpawnPoint->GetComponentLocation(), rotationToSet);
 
-	//step 2: set a timer to delay the next shot
+	//step 3: set a timer to delay the next shot
 	GetWorld()->GetTimerManager().SetTimer(m_gunShotDelayTimer, this, &UShootingComponent::EnableGun, m_delayBetweenThrows_Grenade);
 }
 
