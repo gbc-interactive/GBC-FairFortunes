@@ -26,21 +26,15 @@ private:
 
 	float m_currentMoveSpeed;
 
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float walkingSpeed = 400.0f;
+	float m_walkingSpeed = 400.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float sprintingSpeed = 600.0f;
+	float m_sprintingSpeed = 600.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (ClampMin = "0.0", ClampMax = "100.0", UIMin = "0.0", UIMax = "100.0"))
-	float adsMovementSpeedMultiplierPercent = 70.0f;
+	float m_adsMovementSpeedMultiplierPercent = 70.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float sprintMaxDurationSeconds = 5.0f;
+	float m_sprintMaxDurationSeconds = 5.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float staminaRechargeCooldownSeconds = 1.0f;
+	float m_staminaRechargeCooldownSeconds = 1.0f;
 
 private:
 	void RechargeStamina(float _deltaTime);

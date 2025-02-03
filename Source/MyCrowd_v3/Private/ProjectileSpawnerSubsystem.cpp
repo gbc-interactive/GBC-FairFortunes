@@ -1,28 +1,47 @@
 #include "ProjectileSpawnerSubsystem.h"
-#include <GameFramework/ProjectileMovementComponent.h>
-#include <FFLogger.h>
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "FFLogger.h"
+#include "PlayerStatsManagementSubsystem.h"
+#include <Engine/AssetManager.h>
 
-void UProjectileSpawnerSubsystem::InitializeSubsystem(TSubclassOf<class AProjectileBase> gunProjectileClass, int gunProjectilePoolSize, TSubclassOf<class AProjectileBase> grenadeProjectileClass, int grenadeProjectilePoolSize)
+void UProjectileSpawnerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-	gunProjectilePool = TArray<AProjectileBase*>();
-	grenadeProjectilePool = TArray<AProjectileBase*>();
+	UPlayerStatsManagementSubsystem* dataManager = (UPlayerStatsManagementSubsystem*) Collection.InitializeDependency(UPlayerStatsManagementSubsystem::StaticClass());
 
-	gunProjectilePool.Reserve(gunProjectilePoolSize);
-	grenadeProjectilePool.Reserve(grenadeProjectilePoolSize);
-
-	for (int i = 0; i < gunProjectilePoolSize; i++)
+	if (!dataManager)
 	{
-		AProjectileBase* gunProjectile = (AProjectileBase*) GetWorld()->SpawnActor(gunProjectileClass);
-		DeactivateActor(gunProjectile);
-		gunProjectilePool.Add(gunProjectile);
+		return;
 	}
 
-	/*for(int i = 0; i < grenadeProjectilePoolSize; i++)
+	dataManager->DataLoadCompleteEvent.AddUObject(this, &UProjectileSpawnerSubsystem::OnPlayerDataLoaded);
+}
+
+void UProjectileSpawnerSubsystem::OnPlayerDataLoaded(const UPlayerStatsManagementSubsystem* dataManager)
+{
+	const FProjectileSpawnerSystemData* subsystemData = dataManager->GetProjectileSpawnerSystemData();
+
+	m_gunProjectile = &subsystemData->projectileToSpawn_Gun;
+	m_grenadeProjectile = &subsystemData->projectileToSpawn_Grenade;
+
+	m_gunProjectilePool = TArray<AProjectileBase*>();
+	m_grenadeProjectilePool = TArray<AProjectileBase*>();
+
+	m_gunProjectilePool.Reserve(subsystemData->gunProjectilePoolSize);
+	m_grenadeProjectilePool.Reserve(subsystemData->grenadeProjectilePoolSize);
+
+	for (int i = 0; i < subsystemData->gunProjectilePoolSize; i++)
 	{
-		AProjectileBase* grenadeProjectile = (AProjectileBase*) GetWorld()->SpawnActor(grenadeProjectileClass);
+		AProjectileBase* gunProjectile = (AProjectileBase*)GetWorld()->SpawnActor(m_gunProjectile->Get());
+		DeactivateActor(gunProjectile);
+		m_gunProjectilePool.Add(gunProjectile);
+	}
+
+	for (int i = 0; i < subsystemData->grenadeProjectilePoolSize; i++)
+	{
+		AProjectileBase* grenadeProjectile = (AProjectileBase*)GetWorld()->SpawnActor(m_grenadeProjectile->Get());
 		DeactivateActor(grenadeProjectile);
-		grenadeProjectilePool.Add(grenadeProjectile);
-	}*/
+		m_grenadeProjectilePool.Add(grenadeProjectile);
+	}
 }
 
 
@@ -30,9 +49,9 @@ void UProjectileSpawnerSubsystem::SpawnGunProjectile(FVector _location, FRotator
 {
 	FFLogger::LogMessage(LogMessageSeverity::Debug, "Spawning bullet projectile");
 
-	if(gunProjectilePool.Num() > 0)
+	if(m_gunProjectilePool.Num() > 0)
 	{
-		AProjectileBase* actorToSpawn = gunProjectilePool.Pop(false);
+		AProjectileBase* actorToSpawn = m_gunProjectilePool.Pop(false);
 
 		actorToSpawn->SetActorLocation(_location);
 		actorToSpawn->FindComponentByClass<UProjectileMovementComponent>()->Velocity = _rotation.Vector() * actorToSpawn->projectileSpeed;
@@ -47,6 +66,10 @@ void UProjectileSpawnerSubsystem::SpawnGunProjectile(FVector _location, FRotator
 	else
 	{
 		//why is the pool empty?? this should not happen
+		FFLogger::LogMessage(LogMessageSeverity::Warning, "Projectile Spawner object pool empty, spawning new actor and adding it to pool");
+
+		AProjectileBase* gunProjectile = (AProjectileBase*)GetWorld()->SpawnActor(m_gunProjectile->Get());
+		m_gunProjectilePool.Add(gunProjectile);
 	}
 }
 
@@ -54,7 +77,7 @@ void UProjectileSpawnerSubsystem::SpawnGunProjectile(FVector _location, FRotator
 void UProjectileSpawnerSubsystem::DespawnGunProjectile(AProjectileBase* projectileToDespawn)
 {
 	DeactivateActor(projectileToDespawn);
-	gunProjectilePool.Push(projectileToDespawn);
+	m_gunProjectilePool.Push(projectileToDespawn);
 
 	projectileToDespawn->Execute_OnReturnToPool(projectileToDespawn);
 }
@@ -75,6 +98,10 @@ void UProjectileSpawnerSubsystem::DeactivateActor(AActor* actorToDeactivate)
 	actorToDeactivate->SetActorLocation(FVector::ZeroVector);
 	//actorToDeactivate->SetActorEnableCollision(false);
 	UProjectileMovementComponent* comp = actorToDeactivate->FindComponentByClass<UProjectileMovementComponent>();
+	if (!comp)
+	{
+		return;
+	}
 	comp->bSimulationEnabled = false;
 
 }

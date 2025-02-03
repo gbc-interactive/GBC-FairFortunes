@@ -1,17 +1,14 @@
 #include "CameraControl_Component.h"
 #include "FFLogger.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "PlayerStatsManagementSubsystem.h"
 
-// Sets default values for this component's properties
 UCameraControl_Component::UCameraControl_Component()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
-
 
 // Called when the game starts
 void UCameraControl_Component::BeginPlay()
@@ -25,8 +22,15 @@ void UCameraControl_Component::BeginPlay()
 		m_playerCamera = World->GetFirstPlayerController()->PlayerCameraManager;
 	}
 
-	InitializeAim();
+	const FCameraData* cameraStats = GetWorld()->GetSubsystem<UPlayerStatsManagementSubsystem>()->GetCameraData();
+	m_lookSensitivity = cameraStats->lookSensitivity;
+	m_ADSLookSensitivity = cameraStats->ADSLookSensitivity;
+	m_stoppingTolerance = cameraStats->stoppingTolerance;
+	m_cameraRotationSpeed = cameraStats->cameraRotationSpeed;
+	m_invertYAxis = cameraStats->invertYAxis;
+	m_fovReductionPercent = cameraStats->fovReductionPercent;
 
+	InitializeAim();
 }
 
 
@@ -38,39 +42,39 @@ void UCameraControl_Component::TickComponent(float DeltaTime, ELevelTick TickTyp
 
 	//RotationInterpolation
 
-	//if(useSmoothRotation == true)
-	//{
-	//	if(m_accumulatedRotationInput.Length() > stoppingTolerance)
-	//	{
-	//		//creating variables for Yaw Input
-	//		float cameraSpeed = DeltaTime * cameraRotationSpeed;
-	//		float cameraRotationInputX = m_accumulatedRotationInput.X * cameraSpeed;
-	//		float cameraRotationInputY = m_accumulatedRotationInput.Y * cameraSpeed;
+	if(m_useSmoothRotation == true)
+	{
+		if(m_accumulatedRotationInput.Length() > m_stoppingTolerance)
+		{
+			//creating variables for Yaw Input
+			float cameraSpeed = DeltaTime * m_cameraRotationSpeed;
+			float cameraRotationInputX = m_accumulatedRotationInput.X * cameraSpeed;
+			float cameraRotationInputY = m_accumulatedRotationInput.Y * cameraSpeed;
 
-	//		//adding to Yaw
-	//		m_pawn->AddControllerYawInput(cameraRotationInputX);
+			//adding to Yaw
+			m_pawn->AddControllerYawInput(cameraRotationInputX);
 
-	//		//setting accumulatedRotationInput
-	//		m_accumulatedRotationInput.X = m_accumulatedRotationInput.X - cameraRotationInputX;
+			//setting accumulatedRotationInput
+			m_accumulatedRotationInput.X = m_accumulatedRotationInput.X - cameraRotationInputX;
 
-	//		//Setting Pitch Input
-	//		if(invertYAxis == true)
-	//		{
-	//			//adding to Pitch
-	//			m_pawn->AddControllerPitchInput(cameraRotationInputY * -1.0f);
-	//			//setting accumulatedRotationInput
-	//			m_accumulatedRotationInput.Y = m_accumulatedRotationInput.Y - (cameraRotationInputY * -1.0f);
-	//		}
-	//		else
-	//		{
-	//			//adding to Pitch
-	//			m_pawn->AddControllerPitchInput(cameraRotationInputY);
-	//			//setting accumulatedRotationInput
-	//			m_accumulatedRotationInput.Y = m_accumulatedRotationInput.Y - cameraRotationInputY;
-	//		}
-	//	}
+			//Setting Pitch Input
+			if(m_invertYAxis == true)
+			{
+				//adding to Pitch
+				m_pawn->AddControllerPitchInput(cameraRotationInputY * -1.0f);
+				//setting accumulatedRotationInput
+				m_accumulatedRotationInput.Y = m_accumulatedRotationInput.Y - (cameraRotationInputY * -1.0f);
+			}
+			else
+			{
+				//adding to Pitch
+				m_pawn->AddControllerPitchInput(cameraRotationInputY);
+				//setting accumulatedRotationInput
+				m_accumulatedRotationInput.Y = m_accumulatedRotationInput.Y - cameraRotationInputY;
+			}
+		}
 
-	//}
+	}
 
 
 	if (m_isAnimating == true)
@@ -96,17 +100,17 @@ void UCameraControl_Component::AddRotationInput(FVector2D actionValue)
 	
 	if (m_isAiming)
 	{
-		inputVector = ADSLookSensitivity * actionValue;
+		inputVector = m_ADSLookSensitivity * actionValue;
 	}
 	else
 	{
-		inputVector = lookSensitivity * actionValue;
+		inputVector = m_lookSensitivity * actionValue;
 	}
 
-	/*if(useSmoothRotation == true)
+	if(m_useSmoothRotation == true)
 	{
 		m_accumulatedRotationInput.X = inputVector.X + m_accumulatedRotationInput.X;
-		if (invertYAxis == true)
+		if (m_invertYAxis == true)
 		{
 			m_accumulatedRotationInput.Y = inputVector.Y + m_accumulatedRotationInput.Y;
 		}
@@ -114,12 +118,12 @@ void UCameraControl_Component::AddRotationInput(FVector2D actionValue)
 		{
 			m_accumulatedRotationInput.Y = inputVector.Y * -1.0f + m_accumulatedRotationInput.Y;
 		}
-	}*/
-	//else
+	}
+	else
 	{
 		m_pawn->AddControllerYawInput(inputVector.X);
 
-		if (invertYAxis == true)
+		if (m_invertYAxis == true)
 		{
 			m_pawn->AddControllerPitchInput(inputVector.Y * -1.0f);
 		}
@@ -128,12 +132,11 @@ void UCameraControl_Component::AddRotationInput(FVector2D actionValue)
 			m_pawn->AddControllerPitchInput(inputVector.Y);
 		}
 	}
-
 }
 
 void UCameraControl_Component::ToggleSmoothRotation()
 {
-	useSmoothRotation = !useSmoothRotation;
+	m_useSmoothRotation = !m_useSmoothRotation;
 	m_accumulatedRotationInput = FVector2D{0.0f, 0.0f};
 }
 
@@ -175,7 +178,7 @@ void UCameraControl_Component::InitializeAim()
 	//getting FOV angle from camera
 	m_startFOV = m_playerCamera->GetFOVAngle();
 	//variables for getting endFOV
-	float reducedFOV = fovReductionPercent / 100.0f;
+	float reducedFOV = m_fovReductionPercent / 100.0f;
 	float middleFOV = m_startFOV * reducedFOV;
 	//setting endFOV using the startFOV - middleFOV
 	m_endFOV = m_startFOV - middleFOV;
@@ -225,10 +228,4 @@ void UCameraControl_Component::StopAnimation()
 	m_isAnimating = false;
 	m_animationTimeElapsed = 0.0f;
 	m_isZoomingIn = !m_isZoomingIn;
-}
-
-
-bool UCameraControl_Component::GetIsAiming()
-{
-	return m_isAiming;
 }

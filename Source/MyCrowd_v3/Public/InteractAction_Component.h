@@ -6,34 +6,27 @@
 #include "Components/ActorComponent.h"
 #include "InteractAction_Component.generated.h"
 
+class UCartInteractionSubsystem;
 
 UCLASS( ClassGroup=(Custom), Blueprintable, meta=(BlueprintSpawnableComponent) )
 class MYCROWD_V3_API UInteractAction_Component : public UActorComponent
 {
 	GENERATED_BODY()
 
-
-
-
 private:
-	UPROPERTY(EditAnywhere, Category = "Interaction")
-	TEnumAsByte<ECollisionChannel> TraceChannelProperty = ECC_Pawn;
+
 	
-	UWorld* m_world;
-
-
+	UCartInteractionSubsystem* m_CartInteractionSubsystem;
+	AActor* m_Owner;
 public:	
-	// Sets default values for this component's properties
+	// ctor
 	UInteractAction_Component();
 
 protected:
-	// Called when the game starts
+	// onStart
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+public:
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
 	void TryToInteract();
 

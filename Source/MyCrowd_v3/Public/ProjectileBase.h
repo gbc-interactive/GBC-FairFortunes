@@ -5,7 +5,7 @@
 #include "IPoolable.h"
 #include "ProjectileBase.generated.h"
 
-UCLASS(Blueprintable)
+UCLASS(Abstract, Blueprintable, meta = (DisplayName = "Projectile Base"))
 class MYCROWD_V3_API AProjectileBase : public AActor, public IPoolable
 {
 	GENERATED_BODY()
@@ -13,8 +13,4 @@ class MYCROWD_V3_API AProjectileBase : public AActor, public IPoolable
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
 	float projectileSpeed;
-
-public:
-	AProjectileBase();
-
 };

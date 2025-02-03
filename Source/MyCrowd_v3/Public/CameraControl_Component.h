@@ -35,39 +35,25 @@ private:
 
 
 public:
+	FVector2D m_lookSensitivity{ 1.5f, 1.0f };
 
-	//These variables are for Rotation Interpolation
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Controls")
-	FVector2D lookSensitivity{ 1.5f, 1.0f };
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Controls")
-	FVector2D ADSLookSensitivity{ 1.5f, 1.0f };
+	FVector2D m_ADSLookSensitivity{ 1.5f, 1.0f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Controls")
-	bool useSmoothRotation = true;
+	bool m_useSmoothRotation = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Controls")
-	float stoppingTolerance = 0.1f;
+	float m_stoppingTolerance = 0.1f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Controls")
-	float cameraRotationSpeed = 1.5f;
+	float m_cameraRotationSpeed = 1.5f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Controls")
-	bool invertYAxis = false;
+	bool m_invertYAxis = false;
 
-	//These variables are for aiming
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aiming")
-	float fovReductionPercent = 30.0f;
+	float m_fovReductionPercent = 30.0f;
 
 	DECLARE_DELEGATE(ADSChangedDelegate);
 
 	ADSChangedDelegate ADSBeginEvent;
 	ADSChangedDelegate ADSEndEvent;
-
-private:
-
-	
-
 
 protected:
 	// Called when the game starts
@@ -86,9 +72,6 @@ private:
 	void StartAnimation();
 
 	void StopAnimation();
-
-	//void CheckLineOfSight();
-
 public:
 	// Sets default values for this component's properties
 	UCameraControl_Component();
@@ -106,5 +89,5 @@ public:
 	void StopAiming();
 
 	UFUNCTION(BlueprintCallable)
-	bool GetIsAiming();
+	inline bool GetIsAiming() { return m_isAiming; }
 };

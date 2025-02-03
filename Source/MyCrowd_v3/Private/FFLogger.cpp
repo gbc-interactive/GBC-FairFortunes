@@ -2,8 +2,6 @@
 
 void FFLogger::LogMessage(LogMessageSeverity severity, FString message)
 {
-
-
 	switch (severity)
 	{
 		case LogMessageSeverity::Debug:

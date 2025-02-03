@@ -45,21 +45,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	float reloadTime_Grenade;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	TSubclassOf<class AProjectileBase> projectileToSpawn_Gun;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	UClass* projectileToSpawn_GunClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	UClass* projectileToSpawn_GrenadeClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	TSubclassOf<class AProjectileBase> projectileToSpawn_Grenade;
-
 private:
-	void EnableGun();
-	void EnableGrenade();
+	inline void EnableGun() { m_canShoot_Gun = true; }
+	inline void EnableGrenade() { m_canLaunch_Grenade = true; }
 
 protected:
 	virtual void BeginPlay() override;

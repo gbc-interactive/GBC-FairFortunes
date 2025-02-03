@@ -1,6 +1,7 @@
 #include "ShootingComponent.h"
 #include "FFLogger.h"
 #include "ProjectileSpawnerSubsystem.h"
+#include "PlayerStatsManagementSubsystem.h"
 
 UShootingComponent::UShootingComponent()
 {
@@ -10,19 +11,27 @@ UShootingComponent::UShootingComponent()
 
 void UShootingComponent::BeginPlay()
 {
-	//Super::BeginPlay();
+	Super::BeginPlay();
 
 	m_delayBetweenShots_Gun = 1.0f / fireRate_Gun;
 	m_delayBetweenThrows_Grenade = 1.0f / fireRate_Grenade;
+	
+	const FPlayerWeaponStats* weaponStats = GetWorld()->GetSubsystem<UPlayerStatsManagementSubsystem>()->GetWeaponStats();
+
+	maxAmmo_Gun = weaponStats->MaxAmmo_Gun;
+	fireRate_Gun = weaponStats->fireRate_Gun;
+	reloadTime_Gun = weaponStats->reloadTime_Gun;
+
+	maxAmmo_Grenade = weaponStats->MaxAmmo_Grenade;
+	fireRate_Grenade = weaponStats->fireRate_Grenade;
+	reloadTime_Grenade = weaponStats->reloadTime_Grenade;
 
 	m_currentAmmo_Gun = maxAmmo_Gun;
+	m_currentAmmo_Gun = 20;
 	m_currentAmmo_Grenade = maxAmmo_Grenade;
 
 	m_canLaunch_Grenade = true;
 	m_canShoot_Gun = true;
-
-	//init object pool for gun projectile
-	GetWorld()->GetSubsystem<UProjectileSpawnerSubsystem>()->InitializeSubsystem(projectileToSpawn_GunClass, maxAmmo_Gun, projectileToSpawn_GrenadeClass, maxAmmo_Grenade);
 }
 
 
@@ -48,8 +57,7 @@ void UShootingComponent::ShootGun(FVector bulletSpawnLocation)
 
 	m_currentAmmo_Gun--;
 
-	//step1: instantiate the projectile provided as the bullet, the projectile is assumed to perform its own movement
-	//projectileToSpawn_Grenade
+	//step1: instantiate the projectile provided as the bullet, the projectile will perform its own movement
 	FFLogger::LogMessage(LogMessageSeverity::Debug, "Shooting gun"); 
 	GetWorld()->GetSubsystem<UProjectileSpawnerSubsystem>()->SpawnGunProjectile(bulletSpawnLocation, GetOwner()->GetActorRotation());
 
@@ -74,24 +82,12 @@ void UShootingComponent::LaunchGrenade()
 
 	m_currentAmmo_Grenade--;
 
-	//step1: instantiate the projectile provided as the grenade, the projectile is assumed to perform its own movement
-	//projectileToSpawn_Grenade
+	//step1: instantiate the projectile provided as the grenade, the projectile will perform its own movement
 	FFLogger::LogMessage(LogMessageSeverity::Debug, "Launching grenade");
 
 	//step 2: set a timer to delay the next grenade launch
-
 	GetWorld()->GetTimerManager().SetTimer(m_grenadeDelayTimer, this, &UShootingComponent::EnableGrenade, m_delayBetweenThrows_Grenade);
 
-}
-
-void UShootingComponent::EnableGun()
-{
-	m_canShoot_Gun = true;
-}
-
-void UShootingComponent::EnableGrenade()
-{
-	m_canLaunch_Grenade = true;
 }
 
 void UShootingComponent::ReloadFull_GunAmmo()
